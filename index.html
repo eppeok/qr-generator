@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>QR Code Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#06090f;--card:#0c1220;--border:#1a2840;--text:#e2e8f0;--dim:#64748b;--sub:#94a3b8;--blue:#3b82f6;--green:#22c55e;--yellow:#f59e0b;--purple:#a78bfa}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) var(--delay,0s) infinite alternate}
+@keyframes twinkle{from{opacity:.1}to{opacity:.6}}
+nav{position:sticky;top:0;z-index:100;background:#06090fee;backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:10px;height:56px}
+.nav-back{font-size:.8rem;font-weight:700;color:var(--dim);text-decoration:none;padding:5px 12px;border:1px solid var(--border);border-radius:20px;transition:color .2s}
+.nav-back:hover{color:var(--text)}
+.nav-title{font-size:1.1rem;font-weight:900;color:var(--blue);margin-right:auto}
+.page{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:36px 20px}
+h1{font-size:2rem;font-weight:900;margin-bottom:6px}
+.sub{color:var(--sub);margin-bottom:28px}
+.label{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:8px;display:block}
+input[type=text],input[type=url],textarea{background:#111827;border:1px solid var(--border);color:#fff;border-radius:10px;padding:10px 14px;font-size:.9rem;width:100%;outline:none;transition:border-color .2s;font-family:inherit}
+input:focus,textarea:focus{border-color:var(--blue)}
+.quick-links{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.ql-btn{padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--sub);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.ql-btn:hover{border-color:var(--blue);color:var(--text)}
+.gen-btn{width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-size:1rem;font-weight:800;cursor:pointer;transition:all .2s;margin-top:8px}
+.gen-btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+/* QR output */
+.qr-output{display:none;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center;margin-top:24px}
+.qr-box{background:#fff;border-radius:12px;display:inline-block;padding:16px;margin-bottom:20px}
+.qr-label{font-size:.82rem;color:var(--sub);margin-bottom:16px;word-break:break-all}
+.qr-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.qr-btn{padding:10px 24px;border-radius:50px;border:none;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s}
+.qr-btn:hover{transform:scale(1.04)}
+.qr-btn.primary{background:var(--blue);color:#fff}
+.qr-btn.ghost{background:var(--card);border:1px solid var(--border);color:var(--text)}
+/* Size control */
+.size-row{display:flex;gap:8px;margin-bottom:20px}
+.size-pill{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--sub);font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s}
+.size-pill.active{border-color:var(--blue);background:#0a1830;color:var(--blue)}
+/* Colour options */
+.colour-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.col-swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s}
+.col-swatch.active{border-color:#fff;transform:scale(1.15)}
+/* History */
+.history{margin-top:28px}
+.hist-title{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);margin-bottom:10px}
+.hist-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:background .2s}
+.hist-item:hover{background:#0f1a2e}
+.hist-url{flex:1;font-size:.82rem;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-time{font-size:.7rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<nav>
+  <a href="https://eppeok.github.io" class="nav-back">← All Tools</a>
+  <div class="nav-title">#️⃣ QR Generator</div>
+</nav>
+<div class="page">
+  <h1>#️⃣ QR Generator</h1>
+  <p class="sub">Turn any URL or text into a QR code. Project it, print it, or share it instantly.</p>
+
+  <label class="label">URL or Text</label>
+  <input type="text" id="qr-input" placeholder="https://eppeok.github.io/quizblitz/" oninput="liveGen()"/>
+
+  <div style="margin-top:16px;margin-bottom:8px" class="label">Quick Links</div>
+  <div class="quick-links">
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/')">🏠 Hub</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/quizblitz/')">⚡ QuizBlitz</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/flashcards/')">🃏 FlashBlitz</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/typeblitz/')">⌨️ TypeBlitz</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/math-drill/')">➕ MathDrill</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/exit-ticket/')">🎯 Exit Ticket</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/class-poll/')">📊 Class Poll</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/bingo/')">🎰 Bingo</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/spelling-bee/')">🐝 Spelling Bee</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/word-search/')">🔍 Word Search</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/account/')">👤 Sign In</button>
+  </div>
+
+  <label class="label">Size</label>
+  <div class="size-row">
+    <button class="size-pill" data-sz="160" onclick="selSize(this)">Small</button>
+    <button class="size-pill active" data-sz="220" onclick="selSize(this)">Medium</button>
+    <button class="size-pill" data-sz="300" onclick="selSize(this)">Large</button>
+    <button class="size-pill" data-sz="400" onclick="selSize(this)">XL (Print)</button>
+  </div>
+
+  <label class="label">Colour</label>
+  <div class="colour-row" id="colour-row">
+    <div class="col-swatch active" data-fg="#000000" style="background:#000" onclick="selColour(this)"></div>
+    <div class="col-swatch" data-fg="#1e3a8a" style="background:#1e3a8a" onclick="selColour(this)"></div>
+    <div class="col-swatch" data-fg="#14532d" style="background:#14532d" onclick="selColour(this)"></div>
+    <div class="col-swatch" data-fg="#78350f" style="background:#78350f" onclick="selColour(this)"></div>
+    <div class="col-swatch" data-fg="#4c1d95" style="background:#4c1d95" onclick="selColour(this)"></div>
+    <div class="col-swatch" data-fg="#831843" style="background:#831843" onclick="selColour(this)"></div>
+    <div class="col-swatch" data-fg="#ef4444" style="background:#ef4444" onclick="selColour(this)"></div>
+  </div>
+
+  <!-- QR Output -->
+  <div class="qr-output" id="qr-output">
+    <div class="qr-box"><div id="qr-canvas"></div></div>
+    <div class="qr-label" id="qr-url-label"></div>
+    <div class="qr-actions">
+      <button class="qr-btn primary" onclick="downloadQR()">⬇ Download PNG</button>
+      <button class="qr-btn ghost" onclick="copyQR()">📋 Copy Image</button>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="history" id="history-section" style="display:none">
+    <div class="hist-title">Recent</div>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<script>
+(()=>{const c=document.getElementById('stars');for(let i=0;i<70;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*2+1;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*4}s;opacity:.3`;c.appendChild(s);}})();
+
+let qrSize=220, qrColour='#000000', currentQR=null, debounceTimer=null;
+
+function selSize(el){
+  document.querySelectorAll('.size-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  qrSize=parseInt(el.dataset.sz);
+  if(document.getElementById('qr-input').value.trim()) genQR();
+}
+
+function selColour(el){
+  document.querySelectorAll('.col-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  qrColour=el.dataset.fg;
+  if(document.getElementById('qr-input').value.trim()) genQR();
+}
+
+function setURL(url){
+  document.getElementById('qr-input').value=url;
+  genQR();
+}
+
+function liveGen(){
+  clearTimeout(debounceTimer);
+  debounceTimer=setTimeout(genQR,400);
+}
+
+function genQR(){
+  const text=(document.getElementById('qr-input').value||'').trim();
+  if(!text){ document.getElementById('qr-output').style.display='none'; return; }
+
+  const box=document.getElementById('qr-canvas');
+  box.innerHTML='';
+  try{
+    currentQR=new QRCode(box,{
+      text, width:qrSize, height:qrSize,
+      colorDark:qrColour, colorLight:'#ffffff',
+      correctLevel:QRCode.CorrectLevel.M
+    });
+  }catch(e){ console.error('QR error',e); return; }
+
+  document.getElementById('qr-url-label').textContent=text.length>60?text.slice(0,60)+'…':text;
+  document.getElementById('qr-output').style.display='block';
+  saveHistory(text);
+}
+
+function getCanvas(){
+  return document.querySelector('#qr-canvas canvas')||document.querySelector('#qr-canvas img');
+}
+
+function downloadQR(){
+  const el=getCanvas();
+  if(!el){ alert('Generate a QR code first'); return; }
+  const text=(document.getElementById('qr-input').value||'qr').trim().replace(/[^a-z0-9]/gi,'-').slice(0,30);
+  if(el.tagName==='CANVAS'){
+    const a=document.createElement('a');
+    a.download=`qr-${text}.png`;
+    a.href=el.toDataURL('image/png');
+    a.click();
+  } else {
+    // img tag — draw to canvas first
+    const c2=document.createElement('canvas');
+    c2.width=el.width||qrSize; c2.height=el.height||qrSize;
+    c2.getContext('2d').drawImage(el,0,0);
+    const a=document.createElement('a');
+    a.download=`qr-${text}.png`;
+    a.href=c2.toDataURL('image/png');
+    a.click();
+  }
+}
+
+async function copyQR(){
+  const el=getCanvas();
+  if(!el){ alert('Generate a QR code first'); return; }
+  try{
+    let blob;
+    if(el.tagName==='CANVAS'){
+      blob=await new Promise(res=>el.toBlob(res,'image/png'));
+    } else {
+      const c2=document.createElement('canvas');
+      c2.width=el.width||qrSize; c2.height=el.height||qrSize;
+      c2.getContext('2d').drawImage(el,0,0);
+      blob=await new Promise(res=>c2.toBlob(res,'image/png'));
+    }
+    await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+    alert('QR code copied to clipboard!');
+  }catch(e){ alert('Could not copy image — use Download instead.'); }
+}
+
+// History
+function saveHistory(url){
+  try{
+    let hist=JSON.parse(localStorage.getItem('qr_history')||'[]');
+    hist=hist.filter(h=>h.url!==url);
+    hist.unshift({url,ts:Date.now()});
+    hist=hist.slice(0,8);
+    localStorage.setItem('qr_history',JSON.stringify(hist));
+    renderHistory();
+  }catch(e){}
+}
+
+function renderHistory(){
+  try{
+    const hist=JSON.parse(localStorage.getItem('qr_history')||'[]');
+    const sec=document.getElementById('history-section');
+    if(!hist.length){ sec.style.display='none'; return; }
+    sec.style.display='block';
+    const timeAgo=ts=>{const s=Math.floor((Date.now()-ts)/1000);if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';return Math.floor(s/3600)+'h ago';};
+    document.getElementById('history-list').innerHTML=hist.map(h=>`
+      <div class="hist-item" onclick="setURL('${h.url.replace(/'/g,'%27')}')">
+        <span style="font-size:1.1rem">#️⃣</span>
+        <span class="hist-url">${h.url}</span>
+        <span class="hist-time">${timeAgo(h.ts)}</span>
+      </div>`).join('');
+  }catch(e){}
+}
+
+renderHistory();
+</script>
+</body>
+</html>
