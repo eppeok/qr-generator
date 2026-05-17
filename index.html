@@ -220,19 +220,27 @@ function saveHistory(url){
   }catch(e){}
 }
 
+let histUrls=[];
 function renderHistory(){
   try{
     const hist=JSON.parse(localStorage.getItem('qr_history')||'[]');
     const sec=document.getElementById('history-section');
     if(!hist.length){ sec.style.display='none'; return; }
     sec.style.display='block';
+    histUrls=hist.map(h=>h.url);
     const timeAgo=ts=>{const s=Math.floor((Date.now()-ts)/1000);if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';return Math.floor(s/3600)+'h ago';};
-    document.getElementById('history-list').innerHTML=hist.map(h=>`
-      <div class="hist-item" onclick="setURL('${h.url.replace(/'/g,'%27')}')">
-        <span style="font-size:1.1rem">#️⃣</span>
-        <span class="hist-url">${h.url}</span>
-        <span class="hist-time">${timeAgo(h.ts)}</span>
-      </div>`).join('');
+    const container=document.getElementById('history-list');
+    container.innerHTML='';
+    hist.forEach((h,i)=>{
+      const div=document.createElement('div');
+      div.className='hist-item';
+      div.onclick=()=>setURL(histUrls[i]);
+      const icon=document.createElement('span');icon.style.fontSize='1.1rem';icon.textContent='#️⃣';
+      const url=document.createElement('span');url.className='hist-url';url.textContent=h.url;
+      const time=document.createElement('span');time.className='hist-time';time.textContent=timeAgo(h.ts);
+      div.appendChild(icon);div.appendChild(url);div.appendChild(time);
+      container.appendChild(div);
+    });
   }catch(e){}
 }
 
