@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%22 height=%2732%22 rx=%277%22 fill=%27%2306090f%27/%3E%3Crect x=%271%22 y=%271%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%27none%27 stroke=%27%231a2840%27 stroke-width=%271%27/%3E%3Ctext x=%2216%22 y=%2224%22 font-family=%27system-ui%27 font-size=%2721%22 font-weight=%27900%27 text-anchor=%27middle%27 fill=%27%233b82f6%27%3EE%3C/text%3E%3C/svg%3E"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>QR Code Generator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -78,6 +79,12 @@ input:focus,textarea:focus{border-color:var(--blue)}
     <button class="ql-btn" onclick="setURL('https://eppeok.github.io/bingo/')">🎰 Bingo</button>
     <button class="ql-btn" onclick="setURL('https://eppeok.github.io/spelling-bee/')">🐝 Spelling Bee</button>
     <button class="ql-btn" onclick="setURL('https://eppeok.github.io/word-search/')">🔍 Word Search</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/word-scramble/')">🔀 Word Scramble</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/homework-tracker/')">📚 Homework</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/crossword/')">🔲 Crossword</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/writing-prompts/')">✍️ Writing</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/pomodoro/')">🍅 Pomodoro</button>
+    <button class="ql-btn" onclick="setURL('https://eppeok.github.io/leaderboard/')">🏆 Leaderboard</button>
     <button class="ql-btn" onclick="setURL('https://eppeok.github.io/account/')">👤 Sign In</button>
   </div>
 
@@ -90,14 +97,14 @@ input:focus,textarea:focus{border-color:var(--blue)}
   </div>
 
   <label class="label">Colour</label>
-  <div class="colour-row" id="colour-row">
-    <div class="col-swatch active" data-fg="#000000" style="background:#000" onclick="selColour(this)"></div>
-    <div class="col-swatch" data-fg="#1e3a8a" style="background:#1e3a8a" onclick="selColour(this)"></div>
-    <div class="col-swatch" data-fg="#14532d" style="background:#14532d" onclick="selColour(this)"></div>
-    <div class="col-swatch" data-fg="#78350f" style="background:#78350f" onclick="selColour(this)"></div>
-    <div class="col-swatch" data-fg="#4c1d95" style="background:#4c1d95" onclick="selColour(this)"></div>
-    <div class="col-swatch" data-fg="#831843" style="background:#831843" onclick="selColour(this)"></div>
-    <div class="col-swatch" data-fg="#ef4444" style="background:#ef4444" onclick="selColour(this)"></div>
+  <div class="colour-row" id="colour-row" role="radiogroup" aria-label="QR code colour">
+    <div class="col-swatch active" role="radio" aria-checked="true" aria-label="Black" tabindex="0" data-fg="#000000" style="background:#000" onclick="selColour(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selColour(this);event.preventDefault()}"></div>
+    <div class="col-swatch" role="radio" aria-checked="false" aria-label="Dark Blue" tabindex="0" data-fg="#1e3a8a" style="background:#1e3a8a" onclick="selColour(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selColour(this);event.preventDefault()}"></div>
+    <div class="col-swatch" role="radio" aria-checked="false" aria-label="Dark Green" tabindex="0" data-fg="#14532d" style="background:#14532d" onclick="selColour(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selColour(this);event.preventDefault()}"></div>
+    <div class="col-swatch" role="radio" aria-checked="false" aria-label="Dark Orange" tabindex="0" data-fg="#78350f" style="background:#78350f" onclick="selColour(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selColour(this);event.preventDefault()}"></div>
+    <div class="col-swatch" role="radio" aria-checked="false" aria-label="Dark Purple" tabindex="0" data-fg="#4c1d95" style="background:#4c1d95" onclick="selColour(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selColour(this);event.preventDefault()}"></div>
+    <div class="col-swatch" role="radio" aria-checked="false" aria-label="Dark Pink" tabindex="0" data-fg="#831843" style="background:#831843" onclick="selColour(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selColour(this);event.preventDefault()}"></div>
+    <div class="col-swatch" role="radio" aria-checked="false" aria-label="Red" tabindex="0" data-fg="#ef4444" style="background:#ef4444" onclick="selColour(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selColour(this);event.preventDefault()}"></div>
   </div>
 
   <!-- QR Output -->
@@ -130,8 +137,8 @@ function selSize(el){
 }
 
 function selColour(el){
-  document.querySelectorAll('.col-swatch').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');
+  document.querySelectorAll('.col-swatch').forEach(s=>{s.classList.remove('active');s.setAttribute('aria-checked','false');});
+  el.classList.add('active');el.setAttribute('aria-checked','true');
   qrColour=el.dataset.fg;
   if(document.getElementById('qr-input').value.trim()) genQR();
 }
